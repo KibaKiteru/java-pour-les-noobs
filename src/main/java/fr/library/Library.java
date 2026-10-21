@@ -5,30 +5,80 @@ import java.util.List;
 
 public class Library {
 
-    private final List<Book> books = new ArrayList<>();
+	private final List<Book> books = new ArrayList<>();
 
-    public void addBook(Book book) {
-        // TODO 4 : Ajouter un livre
-        books.add(book);
-    }
+	public void addBook(Book book) {
+		// TODO 4 : Ajouter un livre
+		if (book == null)
+		{
+			throw new NullPointerException("on ne peut pas ajouter un livre null");
+		}
+		if (containsIsbn(book.getIsbn())) {
+			throw new UnsupportedOperationException("Il ne peut pas y avoir deux book avec le même isbn");
+		}
+		books.add(book);
+	}
 
-    public void displayBooks() {
-        // TODO 5 : Afficher tous les livres
+	public void removeBook(String isbn) {
+		books.removeIf(book -> isbn.equals(book.getIsbn()));
+	}
 
-        for (Book book: books) {
-          System.out.println(book);
-        }
-        //throw new UnsupportedOperationException("TODO 5 : displayBooks");
-    }
+	public void displayBooks() {
+		// TODO 5 : Afficher tous les livres
 
-    public Book findBookByTitle(String title) {
-        // TODO 6 : Rechercher un livre par titre
-        for (Book book: books) {
-            if (book.getTitle().equals(title)) {
-                return book;
-            }
-        }
-        return null;
-        //throw new UnsupportedOperationException("TODO 6 : findBookByTitle");
-    }
+		for (Book book: books) {
+			System.out.println(book);
+		}
+		//throw new UnsupportedOperationException("TODO 5 : displayBooks");
+	}
+
+	public Book findBookByTitle(String title) {
+		// TODO 6 : Rechercher un livre par titre
+		for (Book book: books) {
+			if (book.getTitle().equals(title)) {
+				return book;
+			}
+		}
+		return null;
+		//throw new UnsupportedOperationException("TODO 6 : findBookByTitle");
+	}
+
+	public Book findByIsbn(String isbn) {
+		if (isbn == null) {
+			throw new UnsupportedOperationException("Isbn doit être fournit");
+		}
+
+		for (Book book: books) {
+			if (book.getIsbn().equals(isbn)) {
+				return book;
+			}
+		}
+		return null;
+	}
+
+	public List<Book> findByAuthor(String author) {
+		List<Book> booksAuthor = new ArrayList<>();
+		for (Book book: books) {
+			if (book.getAuthor().equals(author)) {
+				booksAuthor.add(book);
+			}
+		}
+		return booksAuthor;
+	}
+
+	public boolean containsIsbn(String isbn) {
+		if (isbn.length() != 13) {
+			return false;
+		}
+		for (Book book: books) {
+			if (book.getIsbn().equals(isbn)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public int size() {
+		return books.size();
+	}
 }
