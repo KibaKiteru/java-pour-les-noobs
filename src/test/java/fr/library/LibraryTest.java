@@ -7,12 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class LibraryTest {
@@ -140,5 +144,67 @@ class LibraryTest {
         assertThrows(IllegalArgumentException.class,
                 () -> new Book(isbn, "Livre", "Auteur", 2026));
 
+    }
+
+    @Test
+    @DisplayName("trie une bibliothèque vide")
+    void shouldSortAnEmptyLibrary() {
+        Library emptyLibrary = new Library();
+
+        assertTrue(emptyLibrary.booksSortedByTitle().isEmpty());
+        assertTrue(emptyLibrary.booksSortedByAuthor().isEmpty());
+        assertTrue(emptyLibrary.booksSortedByIsbn().isEmpty());
+    }
+
+    @Test
+    @DisplayName("conserve les livres qui ont le même titre")
+    void shouldKeepBooksWithSameTitleWhenSorting() {
+        Book secondBook = new Book("9780132350884", "Coder proprement", "Autrice", 2020);
+        library.addBook(secondBook);
+
+        assertEquals(2, library.booksSortedByTitle().size());
+        assertEquals(Set.of(secondBook, library.findBookByTitle("Coder proprement")),
+                Set.copyOf(library.booksSortedByTitle()));
+    }
+
+    @Test
+    @DisplayName("trie les livres par auteur puis par titre")
+    void shouldSortBooksByAuthorThenTitle() {
+        Book secondBook = new Book("9780132350884", "A Java Book", "Robbert C.Martin", 2008);
+        Book thirdBook = new Book("9780134685991", "Effective Java", "Joshua Bloch", 2018);
+        library.addBook(secondBook);
+        library.addBook(thirdBook);
+
+        assertEquals(List.of(thirdBook, secondBook, library.findBookByTitle("Coder proprement")),
+                library.booksSortedByAuthor());
+    }
+
+    @Test
+    @DisplayName("trie les livres par ISBN")
+    void shouldSortBooksByIsbn() {
+        Book secondBook = new Book("9780132350884", "Clean Code", "Robert Martin", 2008);
+        library.addBook(secondBook);
+
+        assertEquals(List.of(secondBook, library.findBookByTitle("Coder proprement")),
+                library.booksSortedByIsbn());
+    }
+
+    @ParameterizedTest
+    @MethodSource("searchCriteria")
+    @DisplayName("recherche avec chaque critère")
+    void shouldSearchUsingCriteria(SearchCriteria criteria, List<Book> expectedBooks) {
+        Book secondBook = new Book("9780132350884", "Effective Java", "Joshua Bloch", 2018);
+        library.addBook(secondBook);
+
+        assertEquals(expectedBooks, library.search(criteria));
+    }
+
+    private static Stream<Arguments> searchCriteria() {
+        Book book = new Book("9782326002272", "Coder proprement", "Robbert C.Martin", 2008);
+        return Stream.of(
+                Arguments.of(new ByTitle("CODER PROPREMENT"), List.of(book)),
+                Arguments.of(new ByAuthor("Joshua Bloch"), List.of(
+                        new Book("9780132350884", "Effective Java", "Joshua Bloch", 2018))),
+                Arguments.of(new ByYearRange(2000, 2010), List.of(book)));
     }
 }
