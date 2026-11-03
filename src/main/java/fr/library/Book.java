@@ -9,7 +9,6 @@ public class Book {
 	private String author;
 	private int year;
 
-	// TODO 1 : initialiser les champs
 	public Book(String isbn, String title, String author, int year) {
 		if ( isbn == null || title == null
 			|| isbn.isBlank()
@@ -23,7 +22,6 @@ public class Book {
 		this.year = year;
 	}
 
-	// TODO 2 : Créer les getters
 	public String getIsbn() {
 		return isbn;
 	}
@@ -40,8 +38,6 @@ public class Book {
 		return year;
 	}
 
-
-	// TODO 3 : Redéfinir toString()
 	@Override
 	public String toString() {
 		return "\nIsbn : " + this.isbn + "\nTitle : " + this.title + "\nAuthor : " + this.author + "\nYear : " + this.year;
