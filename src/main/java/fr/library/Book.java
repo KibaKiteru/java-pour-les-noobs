@@ -1,5 +1,7 @@
 package fr.library;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 public class Book {
@@ -9,7 +11,12 @@ public class Book {
 	private String author;
 	private int year;
 
-	public Book(String isbn, String title, String author, int year) {
+	@JsonCreator
+	public Book(
+			@JsonProperty("isbn") String isbn,
+			@JsonProperty("title") String title,
+			@JsonProperty("author") String author,
+			@JsonProperty("year") int year) {
 		if ( isbn == null || title == null
 			|| isbn.isBlank()
 			|| title.isBlank()
