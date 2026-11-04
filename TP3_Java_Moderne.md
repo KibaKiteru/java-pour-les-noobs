@@ -55,10 +55,55 @@ public List<Book> search(SearchCriteria criteria) {
 
 > Le `switch` n'a pas besoin de `default` : l'interface est `sealed`, le compilateur sait que tous les cas sont traités. Ajoutez un quatrième record à la clause `permits` sans le traiter dans le `switch` : que se passe-t-il ?
 
+## 3. Tester un tri
+
+Créez `src/test/java/fr/library/LibrarySearchTest.java` avec ce premier test :
+
+``` java
+class LibrarySearchTest {
+
+    private static final Book CLEAN_CODE = new Book("9780132350884", "Clean Code", "Robert C. Martin", 2008);
+    private static final Book CLEAN_ARCHITECTURE = new Book("9780134494166", "Clean Architecture", "Robert C. Martin", 2017);
+    private static final Book EFFECTIVE_JAVA = new Book("9780134685991", "Effective Java", "Joshua Bloch", 2018);
+    private static final Book DESIGN_PATTERNS = new Book("9780201633610", "Design Patterns", "Erich Gamma", 1994);
+
+    private Library library;
+
+    @BeforeEach
+    void setUp() {
+        library = new Library();
+        // Volontairement dans le désordre : ni par titre, ni par auteur, ni par ISBN
+        library.addBook(EFFECTIVE_JAVA);
+        library.addBook(CLEAN_CODE);
+        library.addBook(DESIGN_PATTERNS);
+        library.addBook(CLEAN_ARCHITECTURE);
+    }
+
+    @Test
+    void shouldSortByTitle() {
+        assertEquals(List.of(CLEAN_ARCHITECTURE, CLEAN_CODE, DESIGN_PATTERNS, EFFECTIVE_JAVA),
+                library.booksSortedByTitle());
+    }
+}
+```
+
+> ⚠️ **Un test de tri ne prouve quelque chose que si la liste de départ n'est pas déjà triée.** Avec un seul livre, ou des livres ajoutés dans le bon ordre, le test passe même si votre méthode ne trie rien.
+> Vérifiez-le : retirez le `.sorted(...)` de `booksSortedByTitle()`, relancez les tests. Le test doit devenir **rouge**. Remettez le tri.
+
+## Tests à écrire
+
+| Cas à tester |
+|---|
+| tri par auteur puis par titre (les deux livres de Robert C. Martin doivent être départagés par le titre) |
+| tri par ISBN |
+| trier une bibliothèque vide renvoie une liste vide |
+| deux livres de même titre (ISBN différents) sont tous les deux conservés par le tri |
+| un test par critère de recherche : `ByTitle` (sans tenir compte de la casse), `ByAuthor`, `ByYearRange`, et un critère qui ne trouve rien (un `@ParameterizedTest` avec `@MethodSource` est bienvenu) |
+
+Pour chaque test de tri, faites la même vérification : sans le tri, il doit échouer.
+
 ## Contraintes techniques
 
--   Tests unitaires pour les méthodes de tri (dont une bibliothèque vide et deux livres de même titre)
--   Un test par critère de recherche (un test paramétré avec `@MethodSource` est bienvenu)
 -   `search(new ByTitle(...))` ne tient pas compte de la casse (`equalsIgnoreCase`)
 
 ## Bonus
@@ -71,4 +116,5 @@ public List<Book> search(SearchCriteria criteria) {
 
 - [ ] Plus aucune boucle `for` dans `Library`
 - [ ] `search(...)` gère les trois critères avec un `switch` sans `default`
+- [ ] Chaque test de tri échoue si l'on retire le tri correspondant
 - [ ] Tous les tests passent dans la CI

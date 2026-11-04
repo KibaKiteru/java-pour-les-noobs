@@ -47,6 +47,8 @@ class LibraryTest {
 
 Lancez `./gradlew test` : le test doit passer.
 
+> Un test se lit en trois temps : on **prépare** (une bibliothèque avec un livre), on **agit** (la recherche), on **vérifie** (`assertEquals(attendu, obtenu)`). Gardez cette forme pour tous vos tests.
+
 ## 3. Reste à faire
 
 ### Exigences fonctionnelles
@@ -57,12 +59,45 @@ Lancez `./gradlew test` : le test doit passer.
     -   `BookNotFoundException extends LibraryException` : livre absent (recherche, suppression)
     -   `DuplicateBookException extends LibraryException` : ISBN déjà présent
 
+Une fois les exceptions créées, ajoutez ce deuxième test dans `LibraryTest`. Il montre comment vérifier qu'une exception est levée :
+
+``` java
+@Test
+void shouldRejectDuplicateIsbn() {
+    Library library = new Library();
+    library.addBook(new Book("9780132350884", "Clean Code", "Robert C. Martin", 2008));
+    Book sameIsbn = new Book("9780132350884", "Autre titre", "Autre auteur", 2020);
+
+    assertThrows(DuplicateBookException.class, () -> library.addBook(sameIsbn));
+    assertEquals(1, library.size());
+}
+```
+
+> Ajoutez l'import `import static org.junit.jupiter.api.Assertions.assertThrows;`.
+> `assertThrows` attend une lambda : `() -> library.addBook(sameIsbn)`. Si vous écriviez `library.addBook(sameIsbn)` directement, l'exception serait levée avant même d'arriver dans `assertThrows`, et le test planterait.
+
+### Tests à écrire
+
+En vous inspirant des deux tests fournis, écrivez (au moins) les tests suivants :
+
+| Classe de test | Cas à tester |
+|---|---|
+| `LibraryTest` | une bibliothèque neuve est vide (`size()`) |
+| `LibraryTest` | après un ajout, `size()` vaut 1 et `containsIsbn(...)` renvoie `true` |
+| `LibraryTest` | `findByIsbn` trouve le livre ; ISBN inconnu → `BookNotFoundException` |
+| `LibraryTest` | `findBookByTitle` avec un titre inconnu → `BookNotFoundException` |
+| `LibraryTest` | `findByAuthor` renvoie **tous** les livres de l'auteur (mettez-en deux, plus un livre d'un autre auteur) ; auteur inconnu → liste vide |
+| `LibraryTest` | `removeBook` supprime le livre ; ISBN inconnu → `BookNotFoundException` |
+| `BookTest` | le constructeur refuse un ISBN `null`, vide ou fait d'espaces (un seul `@ParameterizedTest`) |
+| `BookTest` | le constructeur refuse un titre `null` ou vide |
+| `BookTest` | deux livres de même ISBN sont égaux (`equals` **et** `hashCode`) ; deux ISBN différents ne le sont pas |
+
+> Quand un test répète la même préparation, déplacez-la dans une méthode annotée `@BeforeEach` : elle est exécutée avant **chaque** test, donc chaque test repart d'une bibliothèque neuve.
+
 ### Contraintes techniques
 
 -   JUnit 6 obligatoire
--   Des tests unitaires pertinents pour chaque méthode de `Library` et pour le constructeur de `Book`
--   Au moins un test paramétré : [documentation JUnit](https://docs.junit.org/current/writing-tests/parameterized-classes-and-tests.html)
--   Tests des cas limites indispensables : ISBN `null`, vide ou fait d'espaces, doublon, livre absent, bibliothèque vide…
+-   Tests paramétrés : [documentation JUnit](https://docs.junit.org/current/writing-tests/parameterized-classes-and-tests.html) (`@NullAndEmptySource` et `@ValueSource` suffisent ici)
 -   Pas d'import `*` (`import static org.junit.jupiter.api.Assertions.*;`) : importez ce que vous utilisez
 -   Ajouter la CI pour lancer les tests automatiquement : créez `.github/workflows/ci.yml` :
 
