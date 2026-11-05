@@ -8,12 +8,11 @@ public class BookService {
 
     private final Library library = new Library();
 
-    public List<Book> getBooks(String sort) {
-        return switch (sort == null || sort.isBlank() ? "title" : sort) {
-            case "title" -> library.booksSortedByTitle();
-            case "author" -> library.booksSortedByAuthor();
-            case "isbn" -> library.booksSortedByIsbn();
-            default -> throw new IllegalArgumentException("Tri inconnu : " + sort);
+    public List<Book> findAll(SortField sort) {
+        return switch (sort) {
+            case TITLE -> library.booksSortedByTitle();
+            case AUTHOR -> library.booksSortedByAuthor();
+            case ISBN -> library.booksSortedByIsbn();
         };
     }
 
