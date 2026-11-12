@@ -16,7 +16,7 @@ public class Library {
 			throw new NullPointerException("on ne peut pas ajouter un livre null");
 		}
 		if (containsIsbn(book.getIsbn())) {
-			throw new DuplicateBookException("Il ne peut pas y avoir deux book avec le même isbn");
+			throw new DuplicateBookException("Livre déjà présent : " + book.getIsbn());
 
 		}
 		books.add(book);
